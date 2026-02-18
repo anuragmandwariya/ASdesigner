@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { MapPin, Phone, Mail, Instagram, Linkedin, CheckCircle, Loader2 } from 'lucide-react';
-// 1. Config file ko import karein
+import { MapPin, Phone, Mail, Instagram, Linkedin, CheckCircle } from 'lucide-react';
+// 1. Import the config link
 import API_BASE_URL from '../config'; 
 
 const Contact = () => {
@@ -11,7 +11,7 @@ const Contact = () => {
     message: ''
   });
 
-  const [status, setStatus] = useState('idle'); // 'idle' | 'submitting' | 'success' | 'error'
+  const [status, setStatus] = useState('idle');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -23,7 +23,7 @@ const Contact = () => {
     setStatus('submitting');
 
     try {
-      // 2. Localhost ki jagah dynamic API_BASE_URL use karein
+      // 2. Updated the fetch URL to use API_BASE_URL
       const response = await fetch(`${API_BASE_URL}/contact`, {
         method: 'POST',
         headers: {
@@ -36,64 +36,63 @@ const Contact = () => {
         setStatus('success');
         setFormData({ firstName: '', lastName: '', email: '', message: '' });
       } else {
-        throw new Error("Failed to send");
+        alert("Failed to send message.");
+        setStatus('idle');
       }
     } catch (error) {
-      console.error("Contact Error:", error);
-      setStatus('error');
-      alert("Server is waking up or connection failed. Please try again in a moment.");
+      console.error("Error:", error);
+      // 3. Updated error message for production context
+      alert("Error connecting to server. The server might be waking up (Render Free Tier). Please try again in 30 seconds.");
+      setStatus('idle');
     }
   };
 
   return (
-    <section id="contact" className="py-24 bg-stone-900 text-white">
-      <div className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+    <section id="contact" className="py-20 bg-stone-dark text-white">
+      <div className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16">
         
         {/* Left Side: Contact Information */}
-        <div className="space-y-12">
-          <div>
-            <h2 className="text-5xl font-serif mb-6 leading-tight">Let's Build Something <span className="italic text-stone-400">Beautiful</span></h2>
-            <div className="w-20 h-1 bg-white mb-8"></div>
-            <p className="text-stone-400 text-lg max-w-md leading-relaxed">
-              Ready to start your design journey? Contact us for a consultation or a custom quote for your space.
-            </p>
-          </div>
+        <div>
+          <h2 className="text-4xl font-serif mb-6">Let's Build Something Beautiful</h2>
+          <p className="text-stone-400 mb-10 max-w-md">
+            Ready to start your design journey? Contact us for a consultation or quote.
+          </p>
 
-          <div className="space-y-8">
-            <div className="flex items-start group">
-              <div className="bg-stone-800 p-4 rounded-sm mr-6 text-white group-hover:bg-white group-hover:text-stone-900 transition-colors duration-500">
+          <div className="space-y-6">
+            <div className="flex items-start">
+              <div className="bg-stone-800 p-3 rounded-full mr-4 text-accent-gold">
                 <MapPin size={24} />
               </div>
               <div>
-                <h4 className="uppercase tracking-[0.2em] text-[10px] font-bold text-stone-500 mb-2">Studio Address</h4>
-                <p className="text-lg text-stone-200">Janjeerwala Chouraha, Race Course Road,<br/> Indore, Madhya Pradesh 452003 </p>
+                <h4 className="uppercase tracking-widest text-sm text-stone-400 mb-1">Studio</h4>
+                <p className="text-lg">Janjeerwala Chouraha, Race Course Road,<br/> Indore, Madhya Pradesh 452003 </p>
               </div>
             </div>
             
-            <div className="flex items-center group">
-              <div className="bg-stone-800 p-4 rounded-sm mr-6 text-white group-hover:bg-white group-hover:text-stone-900 transition-colors duration-500">
+            <div className="flex items-center">
+              <div className="bg-stone-800 p-3 rounded-full mr-4 text-accent-gold">
                 <Phone size={24} />
               </div>
               <div>
-                <h4 className="uppercase tracking-[0.2em] text-[10px] font-bold text-stone-500 mb-2">Call Us</h4>
-                <p className="text-lg text-stone-200">+91 8435161766</p>
+                <h4 className="uppercase tracking-widest text-sm text-stone-400 mb-1">Phone</h4>
+                <p className="text-lg">+91 8435161766</p>
               </div>
             </div>
 
-            <div className="flex items-center group">
-              <div className="bg-stone-800 p-4 rounded-sm mr-6 text-white group-hover:bg-white group-hover:text-stone-900 transition-colors duration-500">
+            <div className="flex items-center">
+              <div className="bg-stone-800 p-3 rounded-full mr-4 text-accent-gold">
                 <Mail size={24} />
               </div>
               <div>
-                <h4 className="uppercase tracking-[0.2em] text-[10px] font-bold text-stone-500 mb-2">Email Inquiry</h4>
-                <p className="text-lg text-stone-200">asinterior@gmail.com</p>
+                <h4 className="uppercase tracking-widest text-sm text-stone-400 mb-1">Email</h4>
+                <p className="text-lg">asinterior@gmail.com</p>
               </div>
             </div>
           </div>
 
-          <div className="flex space-x-6 pt-6">
+          <div className="flex space-x-4 mt-10">
             {[Instagram, Linkedin].map((Icon, i) => (
-              <a key={i} href="#" className="p-4 border border-stone-800 rounded-full hover:bg-white hover:text-stone-900 transition-all duration-500 transform hover:-translate-y-1">
+              <a key={i} href="#" className="p-3 border border-stone-700 rounded-full hover:bg-accent-gold hover:border-accent-gold transition duration-300">
                 <Icon size={20} />
               </a>
             ))}
@@ -101,85 +100,80 @@ const Contact = () => {
         </div>
 
         {/* Right Side: Interactive Form */}
-        <div className="bg-white p-10 md:p-14 rounded-sm shadow-2xl text-stone-900 relative overflow-hidden">
+        <div className="bg-white p-8 md:p-10 rounded-sm shadow-2xl text-stone-800 relative overflow-hidden">
           
-          {/* Success Overlay */}
           {status === 'success' && (
-            <div className="absolute inset-0 bg-stone-50 flex flex-col justify-center items-center z-20 text-center p-10 animate-fade-in">
-              <div className="bg-stone-900 p-5 rounded-full text-white mb-6">
-                <CheckCircle size={50} />
+            <div className="absolute inset-0 bg-stone-100 flex flex-col justify-center items-center z-10 text-center p-8 animate-fade-in">
+              <div className="bg-green-100 p-4 rounded-full text-green-600 mb-4">
+                <CheckCircle size={48} />
               </div>
-              <h3 className="text-3xl font-serif text-stone-900 mb-4">Message Received</h3>
-              <p className="text-stone-500 mb-8 leading-relaxed">Thank you for reaching out to AS Interior. We will review your inquiry and get back to you shortly.</p>
+              <h3 className="text-2xl font-serif text-stone-800 mb-2">Message Sent!</h3>
+              <p className="text-stone-500 mb-6">Thank you for reaching out. We will get back to you within 24 hours.</p>
               <button 
                 onClick={() => setStatus('idle')} 
-                className="text-stone-900 font-bold uppercase text-xs tracking-widest border-b-2 border-stone-900 pb-1 hover:text-stone-500 hover:border-stone-400 transition-all"
+                className="text-accent-gold font-bold uppercase text-xs tracking-widest hover:underline"
               >
                 Send Another Message
               </button>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="relative">
+          <form onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label className="block text-xs uppercase tracking-widest text-stone-500 mb-2">First Name</label>
                 <input 
                   type="text" 
                   name="firstName"
                   required
-                  placeholder="First Name"
                   value={formData.firstName}
                   onChange={handleChange}
-                  className="w-full border-b border-stone-200 py-3 bg-transparent focus:outline-none focus:border-stone-900 transition-colors placeholder:text-stone-300" 
+                  className="w-full border-b border-stone-300 py-2 focus:outline-none focus:border-accent-gold transition" 
                 />
               </div>
-              <div className="relative">
+              <div>
+                <label className="block text-xs uppercase tracking-widest text-stone-500 mb-2">Last Name</label>
                 <input 
                   type="text" 
                   name="lastName"
-                  placeholder="Last Name"
                   value={formData.lastName}
                   onChange={handleChange}
-                  className="w-full border-b border-stone-200 py-3 bg-transparent focus:outline-none focus:border-stone-900 transition-colors placeholder:text-stone-300" 
+                  className="w-full border-b border-stone-300 py-2 focus:outline-none focus:border-accent-gold transition" 
                 />
               </div>
             </div>
-            
-            <div className="relative">
+            <div className="mb-6">
+              <label className="block text-xs uppercase tracking-widest text-stone-500 mb-2">Email Address</label>
               <input 
                 type="email" 
                 name="email"
                 required
-                placeholder="Email Address"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full border-b border-stone-200 py-3 bg-transparent focus:outline-none focus:border-stone-900 transition-colors placeholder:text-stone-300" 
+                className="w-full border-b border-stone-300 py-2 focus:outline-none focus:border-accent-gold transition" 
               />
             </div>
-
-            <div className="relative">
+            <div className="mb-8">
+              <label className="block text-xs uppercase tracking-widest text-stone-500 mb-2">Message</label>
               <textarea 
                 rows="4" 
                 name="message"
                 required
-                placeholder="How can we help you?"
                 value={formData.message}
                 onChange={handleChange}
-                className="w-full border-b border-stone-200 py-3 bg-transparent focus:outline-none focus:border-stone-900 transition-colors resize-none placeholder:text-stone-300"
+                className="w-full border-b border-stone-300 py-2 focus:outline-none focus:border-accent-gold transition"
               ></textarea>
             </div>
-
             <button 
               type="submit" 
               disabled={status === 'submitting'}
-              className="w-full py-5 bg-stone-900 text-white uppercase tracking-[0.3em] text-xs transition-all duration-500 font-bold flex justify-center items-center hover:bg-stone-800 disabled:bg-stone-300"
+              className={`w-full py-4 uppercase tracking-widest text-sm transition duration-300 font-bold ${
+                status === 'submitting' 
+                  ? 'bg-stone-400 cursor-not-allowed text-white' 
+                  : 'bg-stone-900 hover:bg-accent-gold text-white'
+              }`}
             >
-              {status === 'submitting' ? (
-                <>
-                  <Loader2 className="animate-spin mr-2" size={18} />
-                  Sending...
-                </>
-              ) : 'Send Message'}
+              {status === 'submitting' ? 'Sending...' : 'Send Message'}
             </button>
           </form>
         </div>
