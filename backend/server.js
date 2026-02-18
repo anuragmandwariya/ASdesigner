@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import multer from 'multer'; 
 import path from 'path';
-import fs from 'fs'; // 1. fs import karein folder banane ke liye
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import jwt from 'jsonwebtoken';
 
@@ -16,10 +16,10 @@ const __dirname = path.dirname(__filename);
 
 // --- CONFIGURATION ---
 const SECRET_KEY = process.env.JWT_SECRET || 'my_super_secret_key_123'; 
+// Render dynamic port assign karta hai, isliye process.env.PORT zaroori hai
 const PORT = process.env.PORT || 5000;
 
 // --- UPLOADS FOLDER LOGIC ---
-// 2. Rasta fix karein: backend/uploads
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
@@ -29,21 +29,25 @@ if (!fs.existsSync(uploadDir)) {
 app.use(cors());
 app.use(express.json());
 
-// 3. Serving static files (Uploads)
+// 1. Serving static files (Uploads)
 app.use('/uploads', express.static(uploadDir));
 
-// 4. Serving Frontend Production Build
+// 2. Serving Frontend Production Build
+// Note: Deployment ke waqt check karein ki aapka frontend folder root mein hai
 app.use(express.static(path.join(__dirname, "..", "frontend", "dist")));
 
 // --- DATABASE CONNECTION ---
+// Deployment par ye connect hone mein time le sakta hai, isliye options optimize kiye hain
 mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/as_interior')
-    .then(() => console.log('MongoDB Connected'))
-    .catch(err => console.log('MongoDB Connection Error:', err));
+    .then(() => console.log('MongoDB Connected Successfully'))
+    .catch(err => {
+        console.error('MongoDB Connection Error:', err.message);
+        // Atlas IP whitelist check karein (0.0.0.0/0 allow karein)
+    });
 
 // --- IMAGE STORAGE CONFIG ---
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        // 5. Yahan seedha uploadDir variable use karein
         cb(null, uploadDir); 
     },
     filename: (req, file, cb) => {
@@ -72,7 +76,6 @@ const Project = mongoose.model('Project', projectSchema);
 
 // --- ROUTES ---
 
-// 1. ADMIN LOGIN
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
     const adminUser = process.env.ADMIN_USERNAME || 'anurag'; 
@@ -86,7 +89,6 @@ app.post('/api/login', (req, res) => {
     }
 });
 
-// 2. GET ALL PROJECTS
 app.get('/api/projects', async (req, res) => {
     try {
         const projects = await Project.find();
@@ -96,41 +98,35 @@ app.get('/api/projects', async (req, res) => {
     }
 });
 
-// 3. UPLOAD PROJECT
 app.post('/api/projects', upload.array('images', 10), async (req, res) => {
     try {
         const { title, category, location } = req.body;
-        
         if (!req.files || req.files.length === 0) {
             return res.status(400).json({ message: 'No images uploaded' });
         }
 
+        // Render par localhost kaam nahi karega, baseURL environment variable se lein
         const baseURL = process.env.BASE_URL || `http://localhost:${PORT}`;
         const imagePaths = req.files.map(file => `${baseURL}/uploads/${file.filename}`);
         
         const newProject = new Project({ title, category, location, images: imagePaths });
         await newProject.save();
-        
         res.status(201).json(newProject);
     } catch (error) {
-        console.error(error);
         res.status(500).json({ message: 'Error uploading project' });
     }
 });
 
-// 4. DELETE PROJECT
 app.delete('/api/projects/:id', async (req, res) => {
     try {
         const { id } = req.params;
         await Project.findByIdAndDelete(id);
         res.json({ message: 'Project deleted successfully' });
     } catch (error) {
-        console.error("Delete Error:", error);
         res.status(500).json({ message: 'Error deleting project' });
     }
 });
 
-// 5. CONTACT FORM
 app.post('/api/contact', async (req, res) => {
     try {
         const newContact = new Contact(req.body);
@@ -146,4 +142,8 @@ app.get(/.*/, (req, res) => {
     res.sendFile(path.resolve(__dirname, "..", "frontend", "dist", "index.html"));
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// --- LISTEN ---
+// '0.0.0.0' par listen karna Render ke liye zaroori hai taaki server bahar se access ho sake
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server is running on port ${PORT}`);
+});
