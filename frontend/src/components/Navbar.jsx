@@ -1,125 +1,110 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Lock } from 'lucide-react'; // <--- Import Lock Icon
+import { Menu, X, Lock, Phone } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom'; // Agar routing use kar rahe ho
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const location = useLocation();
 
+  // Scroll effect to change appearance
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      setScrolled(window.scrollY > 50);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const navLinks = [
-    { name: 'Home', href: '/' }, // Changed to '/' so it works with routing
-    { name: 'About', href: '#about' },
-    { name: 'Services', href: '#services' },
-    { name: 'Portfolio', href: '#portfolio' },
-    { name: 'Contact', href: '#contact' },
+    { name: 'Home', href: '/#home' },
+    { name: 'Studio', href: '/#about' },
+    { name: 'Portfolio', href: '/#portfolio' },
+    { name: 'Contact', href: '/#contact' },
   ];
 
+  // Logic to determine text color based on scroll and current page
+  const isTransparentPage = location.pathname === '/';
+  const navTextColor = scrolled || !isTransparentPage ? 'text-stone-900' : 'text-white';
+  const navBgColor = scrolled ? 'bg-white/95 backdrop-blur-md shadow-md py-4' : 'bg-transparent py-6';
+
   return (
-    <nav 
-      className={`fixed w-full z-50 transition-all duration-500 ease-in-out ${
-        scrolled 
-          ? 'bg-white/95 backdrop-blur-md shadow-sm py-4' 
-          : 'bg-transparent py-6'
-      }`}
-    >
+    <nav className={`fixed w-full z-50 transition-all duration-500 ease-in-out ${navBgColor}`}>
       <div className="container mx-auto px-6 flex justify-between items-center">
         
         {/* LOGO */}
-        <a 
-          href="/" 
-          className={`text-2xl font-serif font-bold tracking-wider transition-all duration-300 ${
-            scrolled ? 'text-stone-dark scale-95' : 'text-stone-dark md:text-white scale-100'
-          }`}
+        <Link 
+          to="/" 
+          className={`text-2xl font-serif font-bold tracking-[0.2em] transition-all duration-300 ${navTextColor}`}
         >
-          AS INTERIOR
-        </a>
+          AS INTERIOR.
+        </Link>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex space-x-8 items-center">
+        <div className="hidden lg:flex space-x-10 items-center">
           {navLinks.map((link) => (
             <a 
               key={link.name} 
               href={link.href} 
-              className={`text-sm uppercase tracking-widest font-medium hover:text-accent-gold transition duration-300 ${
-                scrolled ? 'text-stone-600' : 'text-white/90'
-              }`}
+              className={`text-[11px] uppercase tracking-[0.3em] font-bold hover:text-stone-400 transition duration-300 ${navTextColor}`}
             >
               {link.name}
             </a>
           ))}
           
-          <a 
-            href="#contact" 
-            className="px-6 py-2 bg-accent-gold text-white font-medium rounded-sm hover:bg-yellow-600 transition duration-300 shadow-md hover:shadow-lg"
-          >
-            Book Consult
-          </a>
+          <div className="h-6 w-[1px] bg-stone-300 mx-2"></div>
 
-          {/* --- ADMIN BUTTON (Desktop) --- */}
-          <a 
-            href="/admin"
-            className={`flex items-center text-xs uppercase tracking-widest font-bold border px-4 py-2 rounded-full transition duration-300 ${
-              scrolled 
-                ? 'border-stone-300 text-stone-600 hover:bg-stone-900 hover:text-white' 
-                : 'border-white/30 text-white hover:bg-white hover:text-stone-900'
+          {/* ADMIN BUTTON (Desktop) */}
+          <Link 
+            to="/admin"
+            className={`flex items-center text-[10px] uppercase tracking-[0.2em] font-bold border px-5 py-2 rounded-sm transition-all duration-300 ${
+              scrolled || !isTransparentPage
+                ? 'border-stone-900 text-stone-900 hover:bg-stone-900 hover:text-white' 
+                : 'border-white/50 text-white hover:bg-white hover:text-stone-900'
             }`}
           >
-            <Lock size={14} className="mr-2" /> Admin
-          </a>
-
+            <Lock size={12} className="mr-2" /> Admin
+          </Link>
         </div>
 
         {/* Mobile Menu Button */}
         <button 
-          className={`md:hidden focus:outline-none transition-colors duration-300 relative z-50 ${
-            isOpen || scrolled ? 'text-stone-dark' : 'text-stone-dark md:text-white'
+          className={`lg:hidden focus:outline-none transition-colors duration-300 z-50 ${
+            isOpen || scrolled || !isTransparentPage ? 'text-stone-900' : 'text-white'
           }`} 
           onClick={() => setIsOpen(!isOpen)}
         >
-          {isOpen ? <X size={28} /> : <Menu size={28} />}
+          {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 
       {/* Mobile Menu Dropdown */}
       <div 
-        className={`md:hidden absolute top-0 left-0 w-full h-screen bg-white flex flex-col justify-center items-center space-y-8 transition-transform duration-500 ease-in-out ${
-          isOpen ? 'translate-y-0' : '-translate-y-full'
+        className={`lg:hidden fixed inset-0 w-full h-screen bg-white flex flex-col justify-center items-center space-y-10 transition-all duration-500 ease-in-out ${
+          isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
         }`}
       >
+        <p className="text-[10px] uppercase tracking-[0.5em] text-stone-400 mb-4">Navigation</p>
         {navLinks.map((link) => (
           <a 
             key={link.name} 
             href={link.href} 
-            className="text-2xl font-serif text-stone-800 hover:text-accent-gold transition duration-300"
+            className="text-3xl font-serif text-stone-900 hover:italic transition-all"
             onClick={() => setIsOpen(false)} 
           >
             {link.name}
           </a>
         ))}
         
-        <a 
-          href="#contact" 
-          className="px-10 py-4 bg-stone-900 text-white font-medium rounded-sm text-lg"
-          onClick={() => setIsOpen(false)}
-        >
-          Book Consult
-        </a>
+        <div className="w-10 h-[1px] bg-stone-200"></div>
 
-        {/* --- ADMIN BUTTON (Mobile) --- */}
-        <a 
-          href="/admin" 
-          className="px-10 py-4 bg-stone-100 text-stone-900 font-bold uppercase tracking-widest rounded-sm flex items-center"
+        <Link 
+          to="/admin" 
+          className="text-xs uppercase tracking-[0.3em] font-bold flex items-center text-stone-500"
           onClick={() => setIsOpen(false)}
         >
-          <Lock size={20} className="mr-2" /> Admin Login
-        </a>
+          <Lock size={16} className="mr-2" /> Admin Access
+        </Link>
       </div>
     </nav>
   );

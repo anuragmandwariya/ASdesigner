@@ -16,8 +16,10 @@ const __dirname = path.dirname(__filename);
 
 // --- CONFIGURATION ---
 const SECRET_KEY = process.env.JWT_SECRET || 'my_super_secret_key_123'; 
-// Render dynamic port assign karta hai, isliye process.env.PORT zaroori hai
 const PORT = process.env.PORT || 5000;
+
+// Render Dashboard mein BASE_URL variable set karein: https://asdesigner-1.onrender.com
+const BASE_URL = process.env.BASE_URL || 'https://asdesigner-1.onrender.com';
 
 // --- UPLOADS FOLDER LOGIC ---
 const uploadDir = path.join(__dirname, 'uploads');
@@ -26,23 +28,27 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 // --- MIDDLEWARE ---
-app.use(cors());
+// CORS mein frontend link allow karna zaroori hai agar frontend alag service hai
+app.use(cors({
+    origin: '*', // Production mein ise specific frontend URL se replace kar sakte hain
+    methods: ['GET', 'POST', 'DELETE', 'PUT'],
+    credentials: true
+}));
 app.use(express.json());
 
 // 1. Serving static files (Uploads)
 app.use('/uploads', express.static(uploadDir));
 
 // 2. Serving Frontend Production Build
-// Note: Deployment ke waqt check karein ki aapka frontend folder root mein hai
+// Ensure karein ki aapka folder structure: root/backend/server.js aur root/frontend/dist hai
 app.use(express.static(path.join(__dirname, "..", "frontend", "dist")));
 
 // --- DATABASE CONNECTION ---
-// Deployment par ye connect hone mein time le sakta hai, isliye options optimize kiye hain
-mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/as_interior')
-    .then(() => console.log('MongoDB Connected Successfully'))
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log('MongoDB Connected Successfully to Atlas'))
     .catch(err => {
         console.error('MongoDB Connection Error:', err.message);
-        // Atlas IP whitelist check karein (0.0.0.0/0 allow karein)
+        console.log('TIP: Check if your IP 0.0.0.0/0 is whitelisted in MongoDB Atlas');
     });
 
 // --- IMAGE STORAGE CONFIG ---
@@ -105,9 +111,8 @@ app.post('/api/projects', upload.array('images', 10), async (req, res) => {
             return res.status(400).json({ message: 'No images uploaded' });
         }
 
-        // Render par localhost kaam nahi karega, baseURL environment variable se lein
-        const baseURL = process.env.BASE_URL || `http://localhost:${PORT}`;
-        const imagePaths = req.files.map(file => `${baseURL}/uploads/${file.filename}`);
+        // BASE_URL ka use karke full image URL banayein
+        const imagePaths = req.files.map(file => `${BASE_URL}/uploads/${file.filename}`);
         
         const newProject = new Project({ title, category, location, images: imagePaths });
         await newProject.save();
@@ -137,13 +142,14 @@ app.post('/api/contact', async (req, res) => {
     }
 });
 
-// --- CATCH-ALL ROUTE ---
-app.get(/.*/, (req, res) => {
+// --- CATCH-ALL ROUTE FOR REACT ROUTER ---
+// Isse page refresh karne par 404 error nahi aayega
+app.get("*", (req, res) => {
     res.sendFile(path.resolve(__dirname, "..", "frontend", "dist", "index.html"));
 });
 
 // --- LISTEN ---
-// '0.0.0.0' par listen karna Render ke liye zaroori hai taaki server bahar se access ho sake
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server is running on port ${PORT}`);
+    console.log(`Access your site at: ${BASE_URL}`);
 });
