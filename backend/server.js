@@ -1,29 +1,38 @@
-require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const multer = require('multer'); 
-const path = require('path');
-const jwt = require('jsonwebtoken');
+import 'dotenv/config';
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import multer from 'multer'; 
+import path from 'path';
+import { fileURLToPath } from 'url';
+import jwt from 'jsonwebtoken';
 
 const app = express();
 
+// --- FIX FOR __dirname IN ES MODULES ---
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // --- CONFIGURATION ---
-// SECRET_KEY ko .env se lein, nahi to default use karein
 const SECRET_KEY = process.env.JWT_SECRET || 'my_super_secret_key_123'; 
 const PORT = process.env.PORT || 5000;
 
 // --- MIDDLEWARE ---
 app.use(cors());
 app.use(express.json());
-// Uploads folder ko static serve karna
+
+// 1. Serving static files (Uploads)
+// This remains relative to 'backend' because 'uploads' is usually inside 'backend'
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// 2. Serving Frontend Production Build
+// We use ".." to go UP one level out of 'backend' to find 'frontend'
+app.use(express.static(path.join(__dirname, "..", "frontend", "dist")));
+
 // --- DATABASE CONNECTION ---
-// process.env.MONGO_URI ka use deployment (Render/Atlas) ke liye
 mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/as_interior')
-.then(() => console.log('MongoDB Connected'))
-.catch(err => console.log('MongoDB Connection Error:', err));
+    .then(() => console.log('MongoDB Connected'))
+    .catch(err => console.log('MongoDB Connection Error:', err));
 
 // --- IMAGE STORAGE CONFIG ---
 const storage = multer.diskStorage({
@@ -56,10 +65,9 @@ const Project = mongoose.model('Project', projectSchema);
 
 // --- ROUTES ---
 
-// 1. ADMIN LOGIN (Updated for Security)
+// 1. ADMIN LOGIN
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
-    // .env se credentials check karna zyada secure hai
     const adminUser = process.env.ADMIN_USERNAME || 'anurag'; 
     const adminPass = process.env.ADMIN_PASSWORD || 'anurag123';
 
@@ -81,7 +89,7 @@ app.get('/api/projects', async (req, res) => {
     }
 });
 
-// 3. UPLOAD PROJECT (Updated for dynamic URLs)
+// 3. UPLOAD PROJECT
 app.post('/api/projects', upload.array('images', 10), async (req, res) => {
     try {
         const { title, category, location } = req.body;
@@ -90,8 +98,6 @@ app.post('/api/projects', upload.array('images', 10), async (req, res) => {
             return res.status(400).json({ message: 'No images uploaded' });
         }
 
-        // Deployment ke waqt localhost:5000 kaam nahi karega
-        // Isliye hum relative path ya environment variable use karte hain
         const baseURL = process.env.BASE_URL || `http://localhost:${PORT}`;
         const imagePaths = req.files.map(file => `${baseURL}/uploads/${file.filename}`);
         
@@ -126,6 +132,13 @@ app.post('/api/contact', async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
     }
+});
+
+// --- CATCH-ALL ROUTE ---
+// Using Regex Literal for Express 5 support
+// Added ".." to resolve the path correctly to the frontend folder
+app.get(/.*/, (req, res) => {
+    res.sendFile(path.resolve(__dirname, "..", "frontend", "dist", "index.html"));
 });
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
