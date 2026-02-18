@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import multer from 'multer'; 
 import path from 'path';
+import fs from 'fs'; // 1. fs import karein folder banane ke liye
 import { fileURLToPath } from 'url';
 import jwt from 'jsonwebtoken';
 
@@ -17,16 +18,21 @@ const __dirname = path.dirname(__filename);
 const SECRET_KEY = process.env.JWT_SECRET || 'my_super_secret_key_123'; 
 const PORT = process.env.PORT || 5000;
 
+// --- UPLOADS FOLDER LOGIC ---
+// 2. Rasta fix karein: backend/uploads
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 // --- MIDDLEWARE ---
 app.use(cors());
 app.use(express.json());
 
-// 1. Serving static files (Uploads)
-// This remains relative to 'backend' because 'uploads' is usually inside 'backend'
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// 3. Serving static files (Uploads)
+app.use('/uploads', express.static(uploadDir));
 
-// 2. Serving Frontend Production Build
-// We use ".." to go UP one level out of 'backend' to find 'frontend'
+// 4. Serving Frontend Production Build
 app.use(express.static(path.join(__dirname, "..", "frontend", "dist")));
 
 // --- DATABASE CONNECTION ---
@@ -37,7 +43,8 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/as_interior
 // --- IMAGE STORAGE CONFIG ---
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/');
+        // 5. Yahan seedha uploadDir variable use karein
+        cb(null, uploadDir); 
     },
     filename: (req, file, cb) => {
         cb(null, 'project-' + Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname));
@@ -135,8 +142,6 @@ app.post('/api/contact', async (req, res) => {
 });
 
 // --- CATCH-ALL ROUTE ---
-// Using Regex Literal for Express 5 support
-// Added ".." to resolve the path correctly to the frontend folder
 app.get(/.*/, (req, res) => {
     res.sendFile(path.resolve(__dirname, "..", "frontend", "dist", "index.html"));
 });
