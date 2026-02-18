@@ -7,62 +7,55 @@ const Hero = () => {
       
       {/* Background Image with Parallax Effect */}
       <div 
-        className="absolute inset-0 bg-cover bg-center z-0 bg-fixed"
+        className="absolute inset-0 bg-cover bg-center z-0"
         style={{ 
           backgroundImage: "url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2600&auto=format&fit=crop')",
-          backgroundAttachment: 'fixed' // Ensures parallax on most browsers
+          // Render/Mobile Fix: background-attachment set to 'fixed' only for larger screens
+          backgroundAttachment: 'fixed' 
         }}
       >
-        {/* Modern Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-stone-900/60 via-stone-900/40 to-stone-900/70"></div>
+        {/* Dark Overlay to ensure text readability */}
+        <div className="absolute inset-0 bg-stone-900/40"></div>
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 text-center px-6 max-w-5xl mx-auto text-white">
-        {/* Subtitle with extra tracking */}
-        <p className="text-[10px] md:text-xs tracking-[0.5em] uppercase mb-6 text-stone-300 font-bold animate-fade-in">
-          Architecture & Bespoke Interiors
+      <div className="relative z-10 text-center px-4 max-w-4xl mx-auto text-white animate-fade-in-up">
+        <p className="text-sm md:text-base tracking-[0.4em] uppercase mb-4 text-accent-gold font-bold">
+         Interior Design
         </p>
         
-        {/* Main Heading */}
-        <h1 className="text-5xl md:text-7xl lg:text-9xl font-serif font-medium mb-8 leading-[1.1] tracking-tight">
-          Curating Spaces <br /> 
-          <span className="italic font-light">That Inspire.</span>
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-medium mb-8 leading-tight">
+          Curating Spaces <br /> That Inspire.
         </h1>
         
-        {/* Description */}
-        <p className="text-base md:text-lg text-stone-300 mb-12 font-light max-w-xl mx-auto leading-relaxed">
-          At <span className="text-white font-normal">AS Interior</span>, we blend functionality with aesthetic perfection to reflect your unique identity.
+        <p className="text-lg md:text-xl text-stone-200 mb-10 font-light max-w-2xl mx-auto leading-relaxed">
+          We blend functionality with aesthetic perfection to create environments that reflect your unique identity.
         </p>
         
-        {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+        {/* Call to Action Buttons */}
+        <div className="flex flex-col md:flex-row gap-4 justify-center">
+          {/* Internal links for smooth navigation on live site */}
           <a 
             href="#portfolio" 
-            className="group relative px-10 py-4 bg-white text-stone-900 overflow-hidden transition-all duration-300 hover:bg-stone-100"
+            className="px-8 py-4 bg-white text-stone-900 font-medium tracking-widest uppercase text-sm hover:bg-accent-gold hover:text-white transition duration-300"
           >
-            <span className="relative z-10 font-bold uppercase tracking-widest text-[10px]">View Projects</span>
+            View Projects
           </a>
-          
           <a 
             href="#contact" 
-            className="px-10 py-4 border border-white/30 text-white font-bold uppercase tracking-widest text-[10px] hover:bg-white hover:text-stone-900 transition-all duration-500"
+            className="px-8 py-4 border border-white text-white font-medium tracking-widest uppercase text-sm hover:bg-white hover:text-stone-900 transition duration-300"
           >
-            Get In Touch
+            Contact Us
           </a>
         </div>
       </div>
 
-      {/* Animated Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 opacity-60 hover:opacity-100 transition-opacity duration-300">
-        <span className="text-[9px] uppercase tracking-[0.3em] text-white vertical-text mb-2">Scroll</span>
-        <a href="#about" className="animate-bounce">
-          <ChevronDown size={20} className="text-white" />
+      {/* Scroll Down Indicator */}
+      <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+        <a href="#about" className="text-white/70 hover:text-white transition">
+          <ChevronDown size={32} />
         </a>
       </div>
-
-      {/* Side Decorative Line */}
-      <div className="absolute left-10 top-1/2 -translate-y-1/2 h-32 w-[1px] bg-white/20 hidden lg:block"></div>
 
     </section>
   );
