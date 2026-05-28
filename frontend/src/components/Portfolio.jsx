@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, Loader } from 'lucide-react';
 import { Link } from 'react-router-dom';
-// Ensure karein ki aapka config file path sahi hai
 import API_BASE_URL from '../config'; 
 
 const Portfolio = () => {
@@ -9,11 +8,9 @@ const Portfolio = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch Projects from Render Backend
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        // Dynamic Render API Link
         const response = await fetch(`${API_BASE_URL}/projects`);
         const data = await response.json();
         setProjects(data);
@@ -85,7 +82,7 @@ const Portfolio = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredProjects.map((project) => (
             
-            <Link to={`/project/${project._id}`} key={project._id} className="block">
+            <Link to={`/project/${project.id}`} key={project.id} className="block">
               <div className="relative group overflow-hidden shadow-lg cursor-pointer bg-black h-96"> 
                 
                 {/* Image Logic */}

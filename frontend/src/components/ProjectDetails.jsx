@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Tag } from 'lucide-react';
-// 1. Apna dynamic API_BASE_URL import karein
 import API_BASE_URL from '../config'; 
 
 const ProjectDetails = () => {
@@ -10,11 +9,11 @@ const ProjectDetails = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 2. Fetching from Render Backend
     fetch(`${API_BASE_URL}/projects`)
       .then(res => res.json())
       .then(data => {
-        const found = data.find(p => p._id === id);
+        // id from URL is string, project.id from Postgres is number — use == for safe match
+        const found = data.find(p => p.id == id);
         setProject(found);
         setLoading(false);
       })

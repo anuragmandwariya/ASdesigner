@@ -1,30 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, Plus, LogOut, ArrowLeft, Trash2, MapPin } from 'lucide-react'; 
 import { useNavigate } from 'react-router-dom';
-// 1. Config file import (ensure path is correct)
 import API_BASE_URL from '../config'; 
 
 const AdminUpload = () => {
-  // Upload State
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Residential');
   const [location, setLocation] = useState('');
   const [files, setFiles] = useState([]); 
   const [loading, setLoading] = useState(false);
-
-  // Manage Projects State
   const [projects, setProjects] = useState([]);
   
   const navigate = useNavigate();
 
-  // Fetch Projects on Load
   useEffect(() => {
     fetchProjects();
   }, []);
 
   const fetchProjects = async () => {
     try {
-      // 2. Updated to use API_BASE_URL (Render Link)
       const res = await fetch(`${API_BASE_URL}/projects`);
       const data = await res.json();
       setProjects(data);
@@ -33,19 +27,17 @@ const AdminUpload = () => {
     }
   };
 
-  // Delete Function
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this project?")) return;
 
     try {
-      // 3. Updated to use API_BASE_URL for Delete
       const res = await fetch(`${API_BASE_URL}/projects/${id}`, {
         method: 'DELETE',
       });
 
       if (res.ok) {
         alert("🗑️ Project Deleted");
-        setProjects(projects.filter(p => p._id !== id));
+        setProjects(projects.filter(p => p.id !== id));
       } else {
         alert("Error deleting project");
       }
@@ -74,7 +66,6 @@ const AdminUpload = () => {
     }
 
     try {
-      // 4. Updated to use API_BASE_URL for Upload
       const res = await fetch(`${API_BASE_URL}/projects`, {
         method: 'POST',
         body: formData,
@@ -149,7 +140,7 @@ const AdminUpload = () => {
               {projects.length === 0 && <p className="text-stone-400 text-sm">No projects yet.</p>}
               
               {projects.map((project) => (
-                <div key={project._id} className="flex items-center justify-between p-3 border border-stone-100 shadow-sm hover:shadow-md transition bg-stone-50">
+                <div key={project.id} className="flex items-center justify-between p-3 border border-stone-100 shadow-sm hover:shadow-md transition bg-stone-50">
                   <div className="flex items-center space-x-3">
                     <img 
                       src={project.images && project.images[0]} 
@@ -163,7 +154,7 @@ const AdminUpload = () => {
                   </div>
 
                   <button 
-                    onClick={() => handleDelete(project._id)}
+                    onClick={() => handleDelete(project.id)}
                     className="text-stone-400 hover:text-red-600 transition p-2"
                     title="Delete Project"
                   >
